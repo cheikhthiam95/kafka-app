@@ -9,7 +9,7 @@ export class KafkaService {
   private messages: string[] = [];
 
   constructor(private readonly eventEmitter: EventEmitter2) {
-    const client = new kafka.KafkaClient({ kafkaHost: 'kafka:9092' });
+    const client = new kafka.KafkaClient({ kafkaHost: 'localhost:9092' });
     this.producer = new kafka.Producer(client);
     this.consumer = new kafka.Consumer(
       client,

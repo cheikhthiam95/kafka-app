@@ -1,4 +1,4 @@
-# Utiliser une image Node.js plus récente
+# Utiliser une image Node.js pour construire l'application
 FROM node:18-alpine
 
 # Définir le répertoire de travail
@@ -17,4 +17,4 @@ COPY . .
 EXPOSE 3000
 
 # Démarrer l'application en mode développement
-CMD ["npm", "run", "dev"]
+CMD ["npm", "run", "start:dev"]

@@ -25,16 +25,11 @@ services:
       - zookeeper
     networks:
       - kafka-net
-    entrypoint: >
-      sh -c "
-        /opt/bitnami/scripts/kafka/entrypoint.sh /run.sh &
-        while ! kafka-topics.sh --bootstrap-server kafka:9092 --list; do sleep 1; done;
-        kafka-topics.sh --create --topic my-topic --bootstrap-server kafka:9092 --replication-factor 1 --partitions 1;
-        sleep infinity;
-      "
 
   kafka-backend:
-    build: ./kafka-backend
+    build:
+      context: ./kafka-backend
+      dockerfile: Dockerfile.dev
     container_name: kafka-backend
     ports:
       - "3000:3000"
@@ -42,11 +37,11 @@ services:
       - kafka
     networks:
       - kafka-net
-    volumes:
-      - ./kafka-backend:/app
 
   kafka-frontend:
-    build: ./kafka-frontend
+    build:
+      context: ./kafka-frontend
+      dockerfile: Dockerfile.dev
     container_name: kafka-frontend
     ports:
       - "3001:3000"
@@ -54,8 +49,6 @@ services:
       - kafka-backend
     networks:
       - kafka-net
-    volumes:
-      - ./kafka-frontend:/app
 
 networks:
   kafka-net:
