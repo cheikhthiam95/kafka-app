@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import io from 'socket.io-client';
 
-const socket = io('http://localhost:3000'); // Assurez-vous que cette URL correspond à celle de votre backend
+const socket = io('http://192.168.1.12:3000'); // Assurez-vous que cette URL correspond à celle de votre backend
 
 export default function Home() {
   const [message, setMessage] = useState('');
@@ -15,6 +15,7 @@ export default function Home() {
     });
 
     socket.on('messages', (newMessages: string[]) => {
+      console.log('Messages received:', newMessages);
       setMessages(newMessages);
     });
 
@@ -31,7 +32,7 @@ export default function Home() {
 
   const sendMessage = async () => {
     if (message.trim()) {
-      socket.emit('sendMessage', message);
+      socket.emit('sendMessage', { message });
       setMessage('');
     }
   };

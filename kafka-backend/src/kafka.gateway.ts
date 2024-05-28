@@ -1,18 +1,22 @@
-import { WebSocketGateway, WebSocketServer, SubscribeMessage, MessageBody, OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect } from '@nestjs/websockets';
-import { Server } from 'socket.io';
-import { Injectable } from '@nestjs/common';
-import { OnEvent } from '@nestjs/event-emitter';
+import {
+  WebSocketGateway,
+  WebSocketServer,
+  SubscribeMessage,
+  OnGatewayInit,
+  OnGatewayConnection,
+  OnGatewayDisconnect,
+} from '@nestjs/websockets';
+import { Server, Socket } from 'socket.io';
 import { KafkaService } from './kafka.service';
+import { OnEvent } from '@nestjs/event-emitter';
 
 @WebSocketGateway({
   cors: {
     origin: '*',
   },
 })
-@Injectable()
 export class KafkaGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
-  @WebSocketServer()
-  server: Server;
+  @WebSocketServer() server: Server;
 
   constructor(private readonly kafkaService: KafkaService) {}
 
@@ -20,20 +24,20 @@ export class KafkaGateway implements OnGatewayInit, OnGatewayConnection, OnGatew
     console.log('WebSocket server initialized');
   }
 
-  handleConnection(client: any, ...args: any[]) {
-    console.log('Client connected:', client.id);
+  handleConnection(client: Socket) {
+    console.log(`Client connected: ${client.id}`);
     // Send the current messages to the connected client
     client.emit('messages', this.kafkaService.getMessages());
   }
 
-  handleDisconnect(client: any) {
-    console.log('Client disconnected:', client.id);
+  handleDisconnect(client: Socket) {
+    console.log(`Client disconnected: ${client.id}`);
   }
 
   @SubscribeMessage('sendMessage')
-  async handleMessage(@MessageBody() message: string): Promise<void> {
-    await this.kafkaService.sendMessage(message);
-    const messages = await this.kafkaService.getMessages();
+  async handleMessage(client: Socket, payload: { message: string }): Promise<void> {
+    await this.kafkaService.sendMessage(payload.message);
+    const messages = this.kafkaService.getMessages();
     this.server.emit('messages', messages);
   }
 
